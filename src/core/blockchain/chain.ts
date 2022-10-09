@@ -37,6 +37,56 @@ export class Chain {
   }
 
   /**
+   * addToChain()
+   * 
+   */
+
+  public addToChain(_receivedBlock : Block):Failable<undefined, string>{
+    const isValid = Block.isValidNewBlock(_receivedBlock, this.getLatestBlock());
+
+    if(isValid.isError) return {isError:true, error : isValid.error};
+
+    this.blockchain.push(_receivedBlock);
+    return {isError : false, value : undefined}
+  }
+
+  /**
+   * isValidChain()
+   */
+
+  isValidChain(_chain:Block[]):Failable<undefined, string>{
+    for(let i=1; i<_chain.length; i++){
+      const newBlock = _chain[i];
+      const previousBlock = _chain[i-1];
+      const isValid = Block.isValidNewBlock(newBlock, previousBlock);
+      if(isValid.isError) return {isError:true, error:isValid.error}
+    }
+
+    return {isError:false, value : undefined}
+  }
+
+  /**
+   * replaceChain()
+   * 체인을 교체한다
+   */
+
+  replaceChain(receivedChain:Block[]):Failable<undefined, string>{
+    const latestReceivedBlock:Block = receivedChain[receivedChain.length  -1];
+    const latestBlock:Block = this.getLatestBlock();
+    if(latestReceivedBlock.height === 0){
+      return {isError:true, error:"receivedBlock is GENESIS BLOCK"}
+    }
+
+    if(latestReceivedBlock.height <= latestBlock.height){
+      return {isError:true, error:"Invalid Block"}
+    }
+
+    // 현재 체인이 더 짧다면 긴 체인으로 변경
+    this.blockchain = receivedChain;
+
+    return {isError:false, value : undefined}
+  }
+  /**
    * getAdjustmentBlock()
    * 생성 시점 기준 이전 블록 묶음을 구한다
    * 1) 현재 높이 < DIFFICULTY_ADJUSTMENT_INTERVAL => GENESIS Block

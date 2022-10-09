@@ -275,7 +275,9 @@
     "ts-jest": "^29.0.3",
     "tsconfig-paths": "^4.1.0"
   },
+  "type" : "module",
   "scripts": {
+    "start" : "ts-node index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
